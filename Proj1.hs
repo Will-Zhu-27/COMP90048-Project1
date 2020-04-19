@@ -15,8 +15,7 @@ type Row = Int
 data Location = Location (Col, Row) deriving (Eq, Read)
 
 instance Show Location where
-    show (Location (col, row))
-        = [toUpper (intToDigit (col + 9)), intToDigit row]
+    show (Location (col, row)) = [chr (64 + col), intToDigit row]
 
 toCol :: Char -> Int
 toCol x = (digitToInt x) - 9
@@ -61,10 +60,21 @@ feedback targets (x:xs) =
         (r1, r2, r3) = result targets x
         in (r1 + n1, r2 + n2, r3 + n3)
 
-data GameState = GG
+data GameState = GameState [(Location, Location, Location)] deriving (Show, Eq)
 
 initialGuess :: ([Location], GameState)
-initialGuess = ([(Location (1,1))], GG)
+initialGuess = ([(Location (1,1))], all_combos)
+    where
+        all_combos = GameState [((Location (x1, y1)),(Location (x2, y2)),(Location (x3, y3)))
+            | x1 <- [1..8]
+            , y1 <- [1..4]
+            , x2 <- [1..8]
+            , y2 <- [1..4]
+            , (x1 * 10 + y1) < (x2 * 10 + y2)
+            , x3 <- [1..8]
+            , y3 <- [1..4]
+            , (x2 * 10 + y2) < (x3 * 10 + y3)
+            ]
 
 nextGuess :: ([Location], GameState) -> (Int, Int, Int) -> ([Location], GameState)
-nextGuess _ _ = ([(Location (1,1))], GG)
+nextGuess _ _ = ([(Location (1,1))], GameState [])
