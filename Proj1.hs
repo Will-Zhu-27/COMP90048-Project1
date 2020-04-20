@@ -52,7 +52,7 @@ result targets guess
     where
         dis_lst = map (distance guess) targets
 
-feedback :: [Location] -> [Location] -> (Int, Int, Int)
+feedback :: [Location] -> [Location] -> (Int,Int,Int)
 feedback _ [] = (0, 0, 0)
 feedback targets (x:xs) = 
     let
@@ -63,7 +63,7 @@ feedback targets (x:xs) =
 data GameState = GameState [(Location, Location, Location)] deriving (Show, Eq)
 
 initialGuess :: ([Location], GameState)
-initialGuess = ([(Location (1,1))], allCombos)
+initialGuess = ([Location (2,3), Location (3,3), Location (6,3)], allCombos)
 
 allCombos :: GameState
 allCombos = GameState [((Location (x1, y1)),(Location (x2, y2)),(Location (x3, y3)))
@@ -100,6 +100,19 @@ repeatGuesses targets guesses gamestate
         let
             (next_guesses, next_gamestate) = nextGuess (guesses, gamestate) (feedback targets guesses)
         in 1 + (repeatGuesses targets next_guesses next_gamestate)
+
+-- 对全部的位置进行测试
+testProj :: [Int]
+testProj = 
+    let (GameState combos_lst) = allCombos
+        lst = map (\(l1, l2, l3) -> [l1, l2, l3]) combos_lst
+    in map (start) lst
+
+testAverage :: Int
+testAverage = 
+    let
+        lst = testProj
+    in div (sum lst) (length lst)
 
 -- 将剩下的组合用上一个guesses进行筛选
 filterByCombos :: GameState -> [Location] -> (Int, Int, Int) -> GameState
