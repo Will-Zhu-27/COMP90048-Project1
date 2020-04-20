@@ -74,8 +74,43 @@ allLocations = [Location (x, y) | x <- [1..8], y <- [1..4]]
 
 nextGuess :: ([Location], GameState) -> (Int, Int, Int) -> GameState
 nextGuess (guesses, (GameState combos)) (n1, n2, n3)
-    | n1 == 0 && n2 == 0 && n3 == 0
-        = filterByLocation (GameState filter_by_n1) (distance1_lst ++ distance2_lst) 0
+    | n1 == 0 && n2 == 0 && n3 == 0 =
+        filterByLocation (GameState filter_by_n1) (distance1_lst ++ distance2_lst) 0
+    | n1 == 0 && n2 == 0 && n3 == 1 =
+        filterByLocation (GameState filter_by_n1) (distance1_lst ++ distance2_overlap2_lst ++ distance2_overlap3_lst) 0
+    | n1 == 0 && n2 == 0 && n3 == 2 =
+        filterByLocation (GameState filter_by_n1) (distance1_lst ++ distance2_overlap3_lst) 0
+    | n1 == 0 && n2 == 0 && n3 == 3 = 
+        filterByLocation (GameState filter_by_n1) (distance1_lst) 0
+    | n1 == 0 && n2 == 1 && n3 == 0 =
+        filterByLocation (GameState filter_by_n1) (distance1_overlap2_lst ++ distance1_overlap3_lst ++ distance2_overlap2_lst ++ distance2_overlap3_lst) 0
+    | n1 == 0 && n2 == 1 && n3 == 1 =
+        filterByLocation (GameState filter_by_n1) (distance1_overlap2_lst ++ distance1_overlap3_lst ++ distance2_overlap3_lst) 0
+    | n1 == 0 && n2 == 1 && n3 == 2 =
+        filterByLocation (GameState filter_by_n1) (distance1_overlap2_lst ++ distance1_overlap3_lst) 0
+    | n1 == 0 && n2 == 2 && n3 == 0 =
+        filterByLocation (GameState filter_by_n1) (distance1_overlap3_lst ++ distance2_overlap3_lst) 0
+    | n1 == 0 && n2 == 2 && n3 == 1 = 
+        filterByLocation (GameState filter_by_n1) (distance1_overlap3_lst) 0
+    | n1 == 1 && n2 == 0 && n3 == 0 = 
+        filterByLocation (GameState filter_by_n1) ((nub (distance1_overlap2_lst ++ distance1_overlap3_lst ++ distance2_overlap2_lst ++ distance2_overlap3_lst)) \\ guesses) 0
+    | n1 == 1 && n2 == 0 && n3 == 1 = 
+        filterByLocation (GameState filter_by_n1) ((nub (distance1_overlap2_lst ++ distance1_overlap3_lst ++ distance2_overlap3_lst)) \\ guesses) 0
+    | n1 == 1 && n2 == 0 && n3 == 2 = 
+        filterByLocation (GameState filter_by_n1) ((nub (distance1_overlap2_lst ++ distance1_overlap3_lst)) \\ guesses) 0
+    | n1 == 1 && n2 == 1 && n3 == 0 = 
+        filterByLocation (GameState filter_by_n1) ((nub (distance1_overlap3_lst ++ distance2_overlap3_lst)) \\ guesses) 0
+    | n1 == 1 && n2 == 1 && n3 == 1 = 
+        filterByLocation (GameState filter_by_n1) ((nub distance1_overlap3_lst) \\ guesses) 0
+    | n1 == 1 && n2 == 2 && n3 == 0 = GameState filter_by_n1
+    | n1 == 2 && n2 == 0 && n3 == 0 = 
+        filterByLocation (GameState filter_by_n1) ((nub (distance1_overlap3_lst ++ distance2_overlap3_lst)) \\ guesses) 0
+    | n1 == 2 && n2 == 0 && n3 == 1 = 
+        filterByLocation (GameState filter_by_n1) ((nub distance1_overlap3_lst) \\ guesses) 0
+    | n1 == 2 && n2 == 1 && n3 == 0 = 
+        filterByLocation (GameState filter_by_n1) ((nub distance2_overlap3_lst) \\ guesses) 0
+    | n1 == 3 && n2 == 0 && n3 == 0 = 
+        GameState [(guess1, guess2, guess3)]
     where
         guess1 = guesses !! 0
         guess2 = guesses !! 1
@@ -83,7 +118,15 @@ nextGuess (guesses, (GameState combos)) (n1, n2, n3)
         (GameState filter_by_n1) = filterByLocation (GameState combos) guesses n1
         distance1_lst = foldl (++) [] (map (\x -> distanceLocation x 1) guesses)
         distance2_lst = foldl (++) [] (map (\x -> distanceLocation x 2) guesses)
+        distance1_overlap2_lst = distanceFilter guesses 1 2
+        distance1_overlap3_lst = distanceFilter guesses 1 3
+        distance2_overlap2_lst = distanceFilter guesses 2 2
+        distance2_overlap3_lst = distanceFilter guesses 2 3
 
+-- 将剩下的组合用上一个guesses进行筛选
+filterByCombos :: GameState -> [Location] -> (Int, Int, Int) -> GameState
+filterByCombos (GameState lst) pre_guesses result =
+    GameState (filter (\(l1, l2, l3) -> feedback [l1,l2,l3] pre_guesses == result) lst)
 
 -- 用于根据猜的位置对GameState进行筛选
 filterByLocation :: GameState -> [Location] -> Int -> GameState
