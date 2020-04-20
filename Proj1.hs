@@ -63,7 +63,13 @@ feedback targets (x:xs) =
 data GameState = GameState [(Location, Location, Location)] deriving (Show, Eq)
 
 initialGuess :: ([Location], GameState)
-initialGuess = ([Location (2,3), Location (3,3), Location (6,3)], allCombos)
+initialGuess = ([l1, l2, l3], initial_gamestate)
+    where
+        [l1, l2, l3] = [Location (1,1), Location (5,4), Location (8,2)]
+        initial_gamestate = 
+            let
+                (GameState lst) = allCombos
+            in GameState (delete (l1,l2,l3) lst)
 
 allCombos :: GameState
 allCombos = GameState [((Location (x1, y1)),(Location (x2, y2)),(Location (x3, y3)))
@@ -114,6 +120,8 @@ testAverage =
         lst = testProj
     in div (sum lst) (length lst)
 
+testSum :: Int
+testSum = sum testProj
 -- 将剩下的组合用上一个guesses进行筛选
 filterByCombos :: GameState -> [Location] -> (Int, Int, Int) -> GameState
 filterByCombos (GameState lst) pre_guesses result =
