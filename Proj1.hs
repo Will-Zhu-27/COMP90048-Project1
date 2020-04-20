@@ -18,7 +18,7 @@ instance Show Location where
     show (Location (col, row)) = [chr (64 + col), intToDigit row]
 
 toCol :: Char -> Int
-toCol x = (digitToInt x) - 9
+toCol x = (ord x) - 64
 
 isInBoard :: String -> Bool
 isInBoard [col_char, row_char]
